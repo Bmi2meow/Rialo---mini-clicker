@@ -3,111 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rialo Mini Clicker</title>
+  <title>Rialo Shooting Game</title>
   <style>
     body {
-      text-align: center;
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
       margin: 0;
       padding: 0;
-    }
-
-    /* Logo styling */
-    .logo {
-      margin-top: 20px;
-    }
-
-    .logo img {
-      width: 180px;
-      animation: glow 2s infinite alternate, shake 4s infinite;
-    }
-
-    @keyframes glow {
-      from {
-        filter: drop-shadow(0 0 5px #ffcc00) drop-shadow(0 0 10px #ffaa00);
-      }
-      to {
-        filter: drop-shadow(0 0 15px #ffcc00) drop-shadow(0 0 25px #ffaa00);
-      }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-5px); }
-      40% { transform: translateX(5px); }
-      60% { transform: translateX(-5px); }
-      80% { transform: translateX(5px); }
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
     }
 
     h1 {
-      margin-top: 10px;
-      font-size: 28px;
-    }
-
-    .score {
-      margin: 15px;
-      font-size: 20px;
-    }
-
-    .click-btn, .reset-btn {
-      padding: 12px 25px;
-      font-size: 18px;
       margin: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .click-btn {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .click-btn:hover {
-      background-color: #45a049;
-      transform: scale(1.05);
-      box-shadow: 0 0 8px #4CAF50;
+    #gameCanvas {
+      background: #222;
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #333;
     }
 
     .reset-btn {
-      background-color: #e74c3c;
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #e74c3c;
       color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
-
     .reset-btn:hover {
-      background-color: #c0392b;
-      transform: scale(1.05);
-      box-shadow: 0 0 8px #e74c3c;
+      background: #c0392b;
     }
   </style>
 </head>
 <body>
-  <!-- Big glowing logo -->
-  <div class="logo">
-    <img src="rialo.png" alt="Rialo Logo">
-  </div>
-
-  <h1>Rialo Mini Clicker</h1>
-  
-  <div class="score" id="score">Score: 0</div>
-  
-  <button class="click-btn" onclick="increaseScore()">Click Here</button>
+  <h1>🎯 Rialo Shooting Game</h1>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <br>
   <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
   <script>
-    let score = 0;
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-    function increaseScore() {
-      score++;
-      document.getElementById("score").innerText = "Score: " + score;
+    let score = 0;
+    let bullets = [];
+    let targets = [];
+    let catSuperman = null;
+
+    const player = { x: 280, y: 350, width: 40, height: 20, speed: 5 };
+
+    // Load images
+    const rialoImg = new Image();
+    rialoImg.src = "rialo.png";
+
+    const catImg = new Image();
+    catImg.src = "cat-superman.png";
+
+    // Key press handling
+    let keys = {};
+    document.addEventListener("keydown", e => keys[e.code] = true);
+    document.addEventListener("keyup", e => keys[e.code] = false);
+
+    function shoot() {
+      bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10 });
     }
 
     function resetGame() {
       score = 0;
-      document.getElementById("score").innerText = "Score: " + score;
+      bullets = [];
+      targets = [];
+      catSuperman = null;
+      player.x = 280;
+      spawnTarget();
     }
+
+    function spawnTarget() {
+      targets.push({
+        x: Math.random() * (canvas.width - 50),
+        y: 50,
+        width: 50,
+        height: 50
+      });
+    }
+
+    function update() {
+      // Move player
+      if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+      if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+      if (keys["Space"]) {
+        if (bullets.length === 0 || bullets[bullets.length-1].y < player.y - 40) {
+          shoot();
+        }
+      }
+
+      // Move bullets
+      bullets.forEach(b => b.y -= 5);
+      bullets = bullets.filter(b => b.y > 0);
+
+      // Check collisions
+      bullets.forEach((b, bi) => {
+        targets.forEach((t, ti) => {
+          if (b.x < t.x + t.width &&
+              b.x + b.width > t.x &&
+              b.y < t.y + t.height &&
+              b.y + b.height > t.y) {
+            // Hit!
+            bullets.splice(bi, 1);
+            targets.splice(ti, 1);
+            score++;
+            catSuperman = { x: -100, y: 100, width: 80, height: 50, speed: 3 };
+            spawnTarget();
+          }
+        });
+      });
+
+      // Move cat superman
+      if (catSuperman) {
+        catSuperman.x += catSuperman.speed;
+        if (catSuperman.x > canvas.width + 100) catSuperman = null;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player
+      ctx.fillStyle = "lime";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Draw bullets
+      ctx.fillStyle = "yellow";
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      // Draw targets
+      targets.forEach(t => ctx.drawImage(rialoImg, t.x, t.y, t.width, t.height));
+
+      // Draw cat superman
+      if (catSuperman) {
+        ctx.drawImage(catImg, catSuperman.x, catSuperman.y, catSuperman.width, catSuperman.height);
+      }
+
+      // Score
+      ctx.fillStyle = "white";
+      ctx.font = "18px Arial";
+      ctx.fillText("Score: " + score, 10, 20);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start game
+    spawnTarget();
+    gameLoop();
   </script>
 </body>
 </html>
