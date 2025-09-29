@@ -29,14 +29,13 @@ function createReward(src, className, x, y) {
 // Helper: generate a random position around the centre logo
 // -------------------------------------------------
 function randomPos(radius = 80) {
-    // Get the centre of the logo element
     const rect = document.querySelector('.logo').getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
     const angle = Math.random() * Math.PI * 2;
     const r = Math.random() * radius;
-    // Subtract half of the reward size (≈15 px) to centre it
+    // Offset half of the reward size (≈15 px) to centre it
     const x = cx + r * Math.cos(angle) - 15;
     const y = cy + r * Math.sin(angle) - 15;
     return { x, y };
