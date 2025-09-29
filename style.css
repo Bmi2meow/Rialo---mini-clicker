@@ -1,99 +1,33 @@
 body {
-  text-align: center;
-  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f9f9f9;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
 }
 
-/* Header logo */
-header {
-  background: white;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-#logoRialo {
-  height: 60px;
-}
-
-/* Main layout */
-main {
-  margin-top: 20px;
-}
-
-#clickBtn, #resetBtn {
-  padding: 15px 30px;
-  font-size: 18px;
+h1 {
   margin: 10px;
-  cursor: pointer;
+}
+
+#gameCanvas {
+  background: #222;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid #333;
+}
+
+.reset-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #e74c3c;
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-#clickBtn {
-  background-color: #4caf50;
-  color: white;
-}
-
-#resetBtn {
-  background-color: #f44336;
-  color: white;
-}
-
-/* Container cho hiệu ứng */
-#effect-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 1000;
-}
-
-/* Hoa logo Rialo */
-.flower {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background-image: url('cat.png'); /* logo Rialo */
-  background-size: cover;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  from { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-  to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-}
-
-/* Bàn tay mèo */
-.cat-hand {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background-image: url('cat-arm.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  z-index: 2000;
-  pointer-events: none;
-}
-
-/* Mèo siêu nhân */
-#superCat {
-  position: fixed;
-  top: 100px;
-  left: -150px;
-  width: 120px;
-  display: none;
-  z-index: 3000;
-}
-
-@keyframes fly {
-  0% { left: -150px; top: 100px; }
-  50% { left: 50%; top: 200px; }
-  100% { left: 110%; top: 120px; }
+.reset-btn:hover {
+  background: #c0392b;
 }
