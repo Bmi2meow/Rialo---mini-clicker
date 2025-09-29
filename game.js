@@ -1,8 +1,27 @@
-// -------------------- VARIABLES --------------------
+// game.js - Rialo Mini Clicker (English UI & code)
+// Author: assistant (provided to user)
+// NOTES:
+// - Milestones: 10, 100, 1000, 10000 -> show branded banner for 10 seconds
+// - Reset clears localStorage and resets state
+// - Script will try a few logo paths (cat-superman.png, cat.png, assets/...) automatically.
+// - All public functions are attached to window so HTML onclick works.
+
+"use strict";
+
+/* -------------------- CONFIG -------------------- */
+const LOGO_CANDIDATES = [
+  "cat-superman.png",
+  "cat.png",
+  "assets/cat-superman.png",
+  "assets/cat.png"
+];
+
+const MILESTONES = [10, 100, 1000, 10000];
+
+/* -------------------- GAME STATE -------------------- */
 let score = 0;
 let clickValue = 1;
 
-// Upgrade objects
 let upgrades = {
   doubleClick: {
     cost: 50,
@@ -19,131 +38,90 @@ let passiveUpgrades = {
   }
 };
 
-// Milestone animation control
-let milestones = [10, 100, 1000, 10000];
-let milestoneShown = {}; // to avoid repeating animation for the same milestone
+let milestoneShown = {}; // { "10": true, ... }
+let prevScore = 0;
 
-// -------------------- CORE GAME --------------------
-function clickButton() {
-  score += clickValue;
-  updateDisplay();
-  checkMilestones();
+/* intervals */
+let passiveInterval = null;
+let autosaveInterval = null;
+
+/* -------------------- UTIL -------------------- */
+function formatNumber(num) {
+  if (num === null || num === undefined) return "0";
+  if (Number.isNaN(num)) return "0";
+  const n = Number(num);
+  if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+  return Math.floor(n).toString();
 }
 
-// -------------------- UPGRADES --------------------
-function buyDoubleClick() {
-  let u = upgrades.doubleClick;
-  if (!u.purchased && score >= u.cost) {
-    score -= u.cost;
-    clickValue *= u.multiplier;
-    u.purchased = true;
-    updateDisplay();
-    updateUpgradeUI();
-    saveGame();
-  }
+/* choose first existing logo by trying to load images */
+function chooseLogo() {
+  return new Promise((resolve) => {
+    let i = 0;
+    function tryNext() {
+      if (i >= LOGO_CANDIDATES.length) return resolve(null);
+      const src = LOGO_CANDIDATES[i++];
+      const img = new Image();
+      img.onload = () => resolve(src);
+      img.onerror = () => tryNext();
+      img.src = src;
+    }
+    tryNext();
+  });
 }
 
-function buyAutoClicker() {
-  let u = passiveUpgrades.autoClicker;
-  if (score >= u.cost) {
-    score -= u.cost;
-    u.amount += 1;
-    u.cost = Math.floor(u.cost * 1.3);
-    updateDisplay();
-    updatePassiveUI();
-    saveGame();
-  }
-}
-
-// -------------------- UI UPDATES --------------------
+/* -------------------- UI UPDATES -------------------- */
 function updateDisplay() {
-  document.getElementById("score").innerText = formatNumber(score);
+  const scoreEl = document.getElementById("score");
+  const clickValEl = document.getElementById("clickValue");
+  if (scoreEl) scoreEl.innerText = formatNumber(score);
+  if (clickValEl) clickValEl.innerText = formatNumber(clickValue);
 }
 
 function updateUpgradeUI() {
-  let btn = document.getElementById("btnDoubleClick");
+  const btn = document.getElementById("btnDoubleClick");
+  if (!btn) return;
   if (upgrades.doubleClick.purchased) {
     btn.innerText = "Purchased";
     btn.disabled = true;
   } else {
-    btn.innerText = `Buy x2 (Cost: ${upgrades.doubleClick.cost})`;
+    btn.innerText = `Buy x2 (Cost: ${formatNumber(upgrades.doubleClick.cost)})`;
+    btn.disabled = score < upgrades.doubleClick.cost;
   }
 }
 
 function updatePassiveUI() {
-  let btn = document.getElementById("btnAutoClicker");
-  btn.innerText = `Buy AutoClicker (Cost: ${passiveUpgrades.autoClicker.cost}) — Owned: ${passiveUpgrades.autoClicker.amount}`;
+  const btn = document.getElementById("btnAutoClicker");
+  if (!btn) return;
+  btn.innerText = `Buy AutoClicker (Cost: ${formatNumber(passiveUpgrades.autoClicker.cost)}) — Owned: ${passiveUpgrades.autoClicker.amount}`;
+  btn.disabled = score < passiveUpgrades.autoClicker.cost;
 }
 
-// -------------------- PASSIVE INCOME --------------------
-setInterval(function () {
-  let inc = passiveUpgrades.autoClicker.amount * passiveUpgrades.autoClicker.cps;
-  score += inc;
-  if (inc > 0) {
-    updateDisplay();
-    checkMilestones();
-  }
-}, 1000);
-
-// -------------------- MILESTONE ANIMATIONS --------------------
-function checkMilestones() {
-  for (let m of milestones) {
-    if (score >= m && !milestoneShown[m]) {
-      showMilestoneAnimation(m);
-      milestoneShown[m] = true;
-    }
-  }
+/* -------------------- CORE ACTIONS -------------------- */
+function clickButton() {
+  prevScore = score;
+  score += clickValue;
+  updateDisplay();
+  checkMilestonesCrossing(prevScore);
+  saveGame();
 }
 
-function showMilestoneAnimation(m) {
-  let banner = document.createElement("div");
-  banner.className = "milestone-banner";
-  banner.innerText = `Milestone reached: ${formatNumber(m)}!`;
-  document.body.appendChild(banner);
-
-  setTimeout(() => {
-    banner.remove();
-  }, 10000); // 10 seconds
-}
-
-// -------------------- SAVE / LOAD --------------------
-function saveGame() {
-  let data = {
-    score,
-    clickValue,
-    upgrades,
-    passiveUpgrades,
-    milestoneShown
-  };
-  localStorage.setItem("rialoClicker_save", JSON.stringify(data));
-}
-
-function loadGame() {
-  let data = JSON.parse(localStorage.getItem("rialoClicker_save"));
-  if (data) {
-    score = data.score;
-    clickValue = data.clickValue;
-    upgrades = data.upgrades;
-    passiveUpgrades = data.passiveUpgrades;
-    milestoneShown = data.milestoneShown || {};
-  }
+function buyDoubleClick() {
+  const u = upgrades.doubleClick;
+  if (u.purchased) return;
+  if (score < u.cost) return;
+  score -= u.cost;
+  clickValue *= u.multiplier;
+  u.purchased = true;
   updateDisplay();
   updateUpgradeUI();
-  updatePassiveUI();
+  saveGame();
 }
 
-// Auto save every 5 seconds
-setInterval(saveGame, 5000);
-
-// -------------------- HELPER --------------------
-function formatNumber(num) {
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
-  return num;
-}
-
-// -------------------- INIT --------------------
-window.onload = function () {
-  loadGame();
-};
+function buyAutoClicker() {
+  const u = passiveUpgrades.autoClicker;
+  if (score < u.cost) return;
+  score -= u.cost;
