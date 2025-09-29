@@ -1,48 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Rialo Mini Clicker</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <img id="r.logo" src="cat-superman.png" alt="Rialo logo (if available)" class="logo" />
-      <h1>Rialo Mini Clicker</h1>
-    </header>
+  <h1>Rialo Mini Clicker</h1>
+  <p>Score: <span id="score">0</span></p>
 
-    <section class="status">
-      <div class="score-box">
-        <div class="label">Score</div>
-        <div id="score" class="score-value">0</div>
-      </div>
+  <!-- Nút click chính -->
+  <button id="clickBtn" onclick="clickButton()">Click Here</button>
 
-      <div class="controls">
-        <button id="btnClick" class="big-btn" onclick="clickButton()">Click Me!</button>
-        <div class="info-line">Click value: <span id="clickValue">1</span></div>
-      </div>
-    </section>
+  <!-- Container hiệu ứng -->
+  <div id="effect-container"></div>
 
-    <section class="shop">
-      <h2>Upgrades</h2>
-      <div class="upgrade-row">
-        <button id="btnDoubleClick" onclick="buyDoubleClick()">Buy x2 (Cost: 50)</button>
-      </div>
-      <div class="upgrade-row">
-        <button id="btnAutoClicker" onclick="buyAutoClicker()">Buy AutoClicker (Cost: 100) — Owned: 0</button>
-      </div>
-    </section>
-
-    <section class="footer-controls">
-      <button id="btnReset" onclick="resetGame()">Reset Game</button>
-      <button id="btnSaveNow" onclick="saveGame()">Save Now</button>
-      <button id="btnLoadNow" onclick="loadGame()">Load Save</button>
-    </section>
-  </main>
-
-  <!-- notifications / milestone banners will be appended to body dynamically -->
+  <!-- Mèo siêu nhân -->
+  <img id="superCat" src="cat-superman.png" alt="Super Cat">
 
   <script src="game.js"></script>
 </body>
