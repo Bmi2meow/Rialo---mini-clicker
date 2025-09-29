@@ -1,83 +1,116 @@
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
 let score = 0;
-let milestones = { 10: false, 100: false, 1000: false };
+let bullets = [];
+let targets = [];
+let catSuperman = null;
 
-// ---------------- CLICK ----------------
-function clickButton() {
-  let multiplier = getRandomMultiplier();
-  let gain = 1 * multiplier;
-  score += gain;
-  document.getElementById("score").innerText = score;
+const player = { x: 280, y: 350, width: 40, height: 20, speed: 5 };
 
-  if (multiplier > 1) {
-    showMultiplierEffect(multiplier);
-  }
+// Load images
+const rialoImg = new Image();
+rialoImg.src = "rialo.png";
 
-  checkMilestones();
+const catImg = new Image();
+catImg.src = "cat-superman.png";
+
+// Key press handling
+let keys = {};
+document.addEventListener("keydown", e => keys[e.code] = true);
+document.addEventListener("keyup", e => keys[e.code] = false);
+
+function shoot() {
+  bullets.push({ x: player.x + player.width/2 - 2, y: player.y, width: 4, height: 10 });
 }
 
-// ---------------- RANDOM MULTIPLIER ----------------
-function getRandomMultiplier() {
-  let roll = Math.random();
-  if (roll < 0.05) return 10;   // 5% x10
-  if (roll < 0.15) return 3;    // 10% x3
-  if (roll < 0.35) return 2;    // 20% x2
-  return 1;                     // 65% normal
+function resetGame() {
+  score = 0;
+  bullets = [];
+  targets = [];
+  catSuperman = null;
+  player.x = 280;
+  spawnTarget();
 }
 
-function showMultiplierEffect(multiplier) {
-  let msg = document.createElement("div");
-  msg.innerText = `x${multiplier}!`;
-  msg.style.position = "fixed";
-  msg.style.top = "50%";
-  msg.style.left = "50%";
-  msg.style.transform = "translate(-50%, -50%)";
-  msg.style.fontSize = "40px";
-  msg.style.fontWeight = "bold";
-  msg.style.color = "red";
-  msg.style.zIndex = "5000";
-  document.body.appendChild(msg);
-
-  setTimeout(() => msg.remove(), 1000);
+function spawnTarget() {
+  targets.push({
+    x: Math.random() * (canvas.width - 50),
+    y: 50,
+    width: 50,
+    height: 50
+  });
 }
 
-// ---------------- MILESTONES ----------------
-function checkMilestones() {
-  if (score >= 10 && !milestones[10]) {
-    milestones[10] = true;
-    launchFlowers();
+function update() {
+  // Move player
+  if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+  if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+  if (keys["Space"]) {
+    if (bullets.length === 0 || bullets[bullets.length-1].y < player.y - 40) {
+      shoot();
+    }
   }
-  if (score >= 100 && !milestones[100]) {
-    milestones[100] = true;
-    showCatHand();
-  }
-  if (score >= 1000 && !milestones[1000]) {
-    milestones[1000] = true;
-    flySuperCat();
+
+  // Move bullets
+  bullets.forEach(b => b.y -= 5);
+  bullets = bullets.filter(b => b.y > 0);
+
+  // Check collisions
+  bullets.forEach((b, bi) => {
+    targets.forEach((t, ti) => {
+      if (b.x < t.x + t.width &&
+          b.x + b.width > t.x &&
+          b.y < t.y + t.height &&
+          b.y + b.height > t.y) {
+        // Hit!
+        bullets.splice(bi, 1);
+        targets.splice(ti, 1);
+        score++;
+        catSuperman = { x: -100, y: 100, width: 80, height: 50, speed: 3 };
+        spawnTarget();
+      }
+    });
+  });
+
+  // Move cat superman
+  if (catSuperman) {
+    catSuperman.x += catSuperman.speed;
+    if (catSuperman.x > canvas.width + 100) catSuperman = null;
   }
 }
 
-// ---------------- FLOWERS (10 points) ----------------
-function launchFlowers() {
-  let container = document.getElementById("effect-container");
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let i = 0; i < 1000; i++) {
-    let flower = document.createElement("div");
-    flower.className = "flower";
-    flower.style.left = Math.random() * 100 + "vw";
-    flower.style.animationDuration = (2 + Math.random() * 3) + "s";
-    container.appendChild(flower);
+  // Draw player
+  ctx.fillStyle = "lime";
+  ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    setTimeout(() => flower.remove(), 10000); // giữ 10s
+  // Draw bullets
+  ctx.fillStyle = "yellow";
+  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+  // Draw targets
+  targets.forEach(t => ctx.drawImage(rialoImg, t.x, t.y, t.width, t.height));
+
+  // Draw cat superman
+  if (catSuperman) {
+    ctx.drawImage(catImg, catSuperman.x, catSuperman.y, catSuperman.width, catSuperman.height);
   }
+
+  // Score
+  ctx.fillStyle = "white";
+  ctx.font = "18px Arial";
+  ctx.fillText("Score: " + score, 10, 20);
 }
 
-// ---------------- CAT HAND (100 points) ----------------
-function showCatHand() {
-  let btn = document.getElementById("clickBtn");
-  let rect = btn.getBoundingClientRect();
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
 
-  let hand = document.createElement("div");
-  hand.className = "cat-hand";
-  hand.id = "catHand"; // để dễ reset
-  hand.style.left = rect.left + window.scrollX + "px";
-  hand.style.top = rect.top + window.scroll
+// Start game
+spawnTarget();
+gameLoop();
