@@ -7,7 +7,7 @@ const rewardLayer = document.getElementById('reward-layer');
 const resetBtn    = document.getElementById('reset');
 
 // -------------------------------------------------
-// Load saved score (if any)
+// Load saved score
 // -------------------------------------------------
 let score = Number(localStorage.getItem('score')) || 0;
 scoreEl.textContent = score;
@@ -18,16 +18,15 @@ scoreEl.textContent = score;
 function createReward(src, className, x, y) {
     const img = document.createElement('img');
     img.src = src;
-    img.className = className;
+    img.className = className + ' rotate-10s';
     img.style.left = `${x}px`;
     img.style.top  = `${y}px`;
     rewardLayer.appendChild(img);
-    // Remove after the animation finishes (max 2.5 s)
-    setTimeout(() => img.remove(), 2500);
+    setTimeout(() => img.remove(), 10_000);   // 10 s
 }
 
 // -------------------------------------------------
-// Helper: generate a random position around the centre logo
+// Random position helper (unchanged)
 // -------------------------------------------------
 function randomPos(radius = 80) {
     const rect = document.querySelector('.logo').getBoundingClientRect();
@@ -36,13 +35,13 @@ function randomPos(radius = 80) {
 
     const angle = Math.random() * Math.PI * 2;
     const r = Math.random() * radius;
-    const x = cx + r * Math.cos(angle) - 15; // offset half of reward size
+    const x = cx + r * Math.cos(angle) - 15;
     const y = cy + r * Math.sin(angle) - 15;
     return { x, y };
 }
 
 // -------------------------------------------------
-// Reward triggers for the four score milestones
+// Milestone rewards
 // -------------------------------------------------
 function triggerReward(newScore) {
     if (newScore === 10) {
@@ -51,17 +50,14 @@ function triggerReward(newScore) {
             createReward('assets/rialo.png', 'flower-piece', x, y);
         }
     }
-
     if (newScore === 100) {
         const { x, y } = randomPos(60);
         createReward('assets/cat-arm.png', 'cat-arm', x, y);
     }
-
     if (newScore === 1000) {
         const { x, y } = randomPos(40);
         createReward('assets/cat.png', 'cat-hug', x, y);
     }
-
     if (newScore === 10000) {
         const { x, y } = randomPos(30);
         createReward('assets/cat-superman.png', 'cat-super', x, y);
@@ -69,7 +65,7 @@ function triggerReward(newScore) {
 }
 
 // -------------------------------------------------
-// Click handling – increment, persist, and check rewards
+// Click handling
 // -------------------------------------------------
 btn.addEventListener('click', () => {
     score++;
@@ -79,25 +75,14 @@ btn.addEventListener('click', () => {
 });
 
 // -------------------------------------------------
-// Reset game – bring everything back to the initial state
+// Reset game (unchanged from earlier)
 // -------------------------------------------------
 function resetGame() {
-    // 1️⃣ Reset the score
     score = 0;
     scoreEl.textContent = score;
     localStorage.setItem('score', score);
-
-    // 2️⃣ Remove all reward images that were added to the page
-    while (rewardLayer.firstChild) {
-        rewardLayer.removeChild(rewardLayer.firstChild);
-    }
+    while (rewardLayer.firstChild) rewardLayer.removeChild(rewardLayer.firstChild);
 }
-
-// -------------------------------------------------
-// Listen for the Reset button
-// -------------------------------------------------
 resetBtn.addEventListener('click', () => {
-    if (confirm('Reset the game and start over?')) {
-        resetGame();
-    }
+    if (confirm('Reset the game and start over?')) resetGame();
 });
