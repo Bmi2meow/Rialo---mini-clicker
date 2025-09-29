@@ -1,56 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Mini Clicker – Rialo</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Logo -->
-    <img src="assets/rialo.png" alt="Rialo logo" class="logo">
-
-    <h1>Mini Clicker</h1>
-
-    <!-- Current score -->
-    <div id="score">0</div>
-
-    <!-- Click button -->
-    <button id="btn">Click me!</button>
-
-    <!-- Layer that will hold all animated rewards -->
-    <div id="reward-layer"></div>
-
-    <script src="game.js"></script>
-</body>
-</html>
-<!-- Put this next to your existing Click button -->
-<button id="reset">🔄 Reset</button>
-<!-- index.html – make sure the CSS is loaded -->
-<style>
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-.rotate-10s { animation: spin 10s linear infinite; }
-</style>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rialo Mini Clicker</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Rialo Mini Clicker</h1>
-  <p>Score: <span id="score">0</span></p>
+  <main class="container">
+    <header class="header">
+      <img id="r.logo" src="cat-superman.png" alt="Rialo logo (if available)" class="logo" />
+      <h1>Rialo Mini Clicker</h1>
+    </header>
 
-  <button onclick="clickButton()">Click Me!</button>
-  <br><br>
+    <section class="status">
+      <div class="score-box">
+        <div class="label">Score</div>
+        <div id="score" class="score-value">0</div>
+      </div>
 
-  <button id="btnDoubleClick" onclick="buyDoubleClick()">Buy x2 (Cost: 50)</button>
-  <br><br>
+      <div class="controls">
+        <button id="btnClick" class="big-btn" onclick="clickButton()">Click Me!</button>
+        <div class="info-line">Click value: <span id="clickValue">1</span></div>
+      </div>
+    </section>
 
-  <button id="btnAutoClicker" onclick="buyAutoClicker()">Buy AutoClicker (Cost: 100)</button>
+    <section class="shop">
+      <h2>Upgrades</h2>
+      <div class="upgrade-row">
+        <button id="btnDoubleClick" onclick="buyDoubleClick()">Buy x2 (Cost: 50)</button>
+      </div>
+      <div class="upgrade-row">
+        <button id="btnAutoClicker" onclick="buyAutoClicker()">Buy AutoClicker (Cost: 100) — Owned: 0</button>
+      </div>
+    </section>
+
+    <section class="footer-controls">
+      <button id="btnReset" onclick="resetGame()">Reset Game</button>
+      <button id="btnSaveNow" onclick="saveGame()">Save Now</button>
+      <button id="btnLoadNow" onclick="loadGame()">Load Save</button>
+    </section>
+  </main>
+
+  <!-- notifications / milestone banners will be appended to body dynamically -->
 
   <script src="game.js"></script>
 </body>
