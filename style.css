@@ -1,20 +1,31 @@
-body{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    margin-top:50px;
-    font-family:sans-serif;
+/* Center everything and give the logo a nice size */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    font-family: sans-serif;
 }
-#score{
-    font-size:2.5rem;
-    margin:20px;
+
+/* Logo styling */
+.logo {
+    width: 150px;          /* Adjust as needed */
+    margin: 20px 0;
 }
-button{
-    padding:20px 40px;
-    font-size:1.2rem;
-    cursor:pointer;
-    transition:transform .1s;
+
+/* Score display */
+#score {
+    font-size: 2.5rem;
+    margin: 20px;
 }
-button:active{
-    transform:scale(0.9);
+
+/* Button styling */
+button {
+    padding: 20px 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform .1s;
+}
+button:active {
+    transform: scale(0.9);
 }
