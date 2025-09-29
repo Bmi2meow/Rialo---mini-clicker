@@ -2,29 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rialo Mini Clicker</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* CSS như mình gửi ở trên */
+  </style>
 </head>
 <body>
-  <!-- Logo Rialo -->
-  <header>
-    <img id="logoRialo" src="cat.png" alt="Rialo Logo">
-  </header>
+  <!-- Logo to nằm giữa -->
+  <div class="logo">
+    <img src="rialo.png" alt="Rialo Logo">
+  </div>
 
-  <!-- Nội dung chính -->
-  <main>
-    <h1>Rialo Mini Clicker</h1>
-    <p>Score: <span id="score">0</span></p>
+  <h1>Rialo Mini Clicker</h1>
+  
+  <div class="score" id="score">Score: 0</div>
+  
+  <button class="click-btn" onclick="increaseScore()">Click Here</button>
+  <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
-    <!-- Nút click chính -->
-    <button id="clickBtn" onclick="clickButton()">Click Here</button>
+  <script>
+    let score = 0;
 
-    <!-- Nút reset -->
-    <button id="resetBtn" onclick="resetGame()">Reset Game</button>
-  </main>
+    function increaseScore() {
+      score++;
+      document.getElementById("score").innerText = "Score: " + score;
+    }
 
-  <!-- Container hiệu ứng -->
-  <div id="effect-container"></div>
-
-  <!-- Mèo siêu nhân -->
-  <img id="superCat" src="cat-superm
+    function resetGame() {
+      score = 0;
+      document.getElementById("score").innerText = "Score: " + score;
+    }
+  </script>
+</body>
+</html>
