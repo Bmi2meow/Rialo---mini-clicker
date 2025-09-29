@@ -1,12 +1,14 @@
+// Elements
 const btn      = document.getElementById('btn');
 const scoreEl  = document.getElementById('score');
-let score      = Number(localStorage.getItem('score')) || 0;
 
-// Đưa điểm đã lưu (nếu có) lên giao diện
+// Load saved score (if any)
+let score = Number(localStorage.getItem('score')) || 0;
 scoreEl.textContent = score;
 
+// Increment score on click
 btn.addEventListener('click', () => {
     score++;
     scoreEl.textContent = score;
-    localStorage.setItem('score', score);   // lưu điểm
+    localStorage.setItem('score', score); // persist across reloads
 });
