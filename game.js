@@ -8,7 +8,6 @@ function clickButton() {
   score += gain;
   document.getElementById("score").innerText = score;
 
-  // Nếu có multiplier > 1 thì hiện thông báo
   if (multiplier > 1) {
     showMultiplierEffect(multiplier);
   }
@@ -79,15 +78,6 @@ function showCatHand() {
 
   let hand = document.createElement("div");
   hand.className = "cat-hand";
+  hand.id = "catHand"; // để dễ reset
   hand.style.left = rect.left + window.scrollX + "px";
-  hand.style.top = rect.top + window.scrollY - 90 + "px";
-
-  document.body.appendChild(hand);
-}
-
-// ---------------- SUPER CAT (1000 points) ----------------
-function flySuperCat() {
-  let cat = document.getElementById("superCat");
-  cat.style.display = "block";
-  cat.style.animation = "fly 5s linear infinite";
-}
+  hand.style.top = rect.top + window.scroll
