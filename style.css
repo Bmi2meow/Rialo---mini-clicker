@@ -7,7 +7,7 @@ body {
     align-items: center;
     margin-top: 30px;
     font-family: sans-serif;
-    position: relative;          /* cho các phần tử absolute trong reward-layer */
+    position: relative;          /* needed for absolute rewards */
 }
 .logo {
     width: 150px;
@@ -28,12 +28,12 @@ button:active {
 }
 
 /* -------------------------------------------------
-   Reward layer – nằm trên cùng
+   Reward layer – sits on top of everything
    ------------------------------------------------- */
 #reward-layer {
     position: absolute;
-    inset: 0;                    /* phủ toàn bộ viewport */
-    pointer-events: none;        /* không chặn click */
+    inset: 0;                /* fill the whole viewport */
+    pointer-events: none;    /* clicks go through */
     overflow: hidden;
 }
 
@@ -42,7 +42,7 @@ button:active {
    ------------------------------------------------- */
 .flower-piece {
     position: absolute;
-    width: 30px;                /* kích thước mỗi “cánh hoa” */
+    width: 30px;
     opacity: 0;
     animation: blossom 1.2s forwards;
 }
