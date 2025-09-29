@@ -6,21 +6,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Rialo Mini Clicker</h1>
-  <p>Score: <span id="score">0</span></p>
+  <!-- Logo Rialo -->
+  <header>
+    <img id="logoRialo" src="cat.png" alt="Rialo Logo">
+  </header>
 
-  <!-- Nút click chính -->
-  <button id="clickBtn" onclick="clickButton()">Click Here</button>
-  <br><br>
-  <!-- Nút reset -->
-  <button id="resetBtn" onclick="resetGame()">Reset Game</button>
+  <!-- Nội dung chính -->
+  <main>
+    <h1>Rialo Mini Clicker</h1>
+    <p>Score: <span id="score">0</span></p>
+
+    <!-- Nút click chính -->
+    <button id="clickBtn" onclick="clickButton()">Click Here</button>
+
+    <!-- Nút reset -->
+    <button id="resetBtn" onclick="resetGame()">Reset Game</button>
+  </main>
 
   <!-- Container hiệu ứng -->
   <div id="effect-container"></div>
 
   <!-- Mèo siêu nhân -->
-  <img id="superCat" src="cat-superman.png" alt="Super Cat">
-
-  <script src="game.js"></script>
-</body>
-</html>
+  <img id="superCat" src="cat-superm
