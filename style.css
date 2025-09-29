@@ -98,3 +98,23 @@ button:active {
     80%  { transform: translateY(0) rotate(0deg) scale(1.2); }
     100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0; }
 }
+.milestone-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: gold;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 15px 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  animation: popIn 0.5s ease-out;
+  z-index: 9999;
+}
+
+@keyframes popIn {
+  from { transform: translateX(-50%) scale(0.5); opacity: 0; }
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
