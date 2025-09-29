@@ -25,3 +25,11 @@
 </html>
 <!-- Put this next to your existing Click button -->
 <button id="reset">🔄 Reset</button>
+<!-- index.html – make sure the CSS is loaded -->
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.rotate-10s { animation: spin 10s linear infinite; }
+</style>
