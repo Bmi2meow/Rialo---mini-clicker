@@ -33,3 +33,25 @@
 }
 .rotate-10s { animation: spin 10s linear infinite; }
 </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rialo Mini Clicker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Rialo Mini Clicker</h1>
+  <p>Score: <span id="score">0</span></p>
+
+  <button onclick="clickButton()">Click Me!</button>
+  <br><br>
+
+  <button id="btnDoubleClick" onclick="buyDoubleClick()">Buy x2 (Cost: 50)</button>
+  <br><br>
+
+  <button id="btnAutoClicker" onclick="buyAutoClicker()">Buy AutoClicker (Cost: 100)</button>
+
+  <script src="game.js"></script>
+</body>
+</html>
