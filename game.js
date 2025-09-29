@@ -1,88 +1,149 @@
-// -------------------------------------------------
-// Elements
-// -------------------------------------------------
-const btn         = document.getElementById('btn');
-const scoreEl     = document.getElementById('score');
-const rewardLayer = document.getElementById('reward-layer');
-const resetBtn    = document.getElementById('reset');
+// -------------------- VARIABLES --------------------
+let score = 0;
+let clickValue = 1;
 
-// -------------------------------------------------
-// Load saved score
-// -------------------------------------------------
-let score = Number(localStorage.getItem('score')) || 0;
-scoreEl.textContent = score;
+// Upgrade objects
+let upgrades = {
+  doubleClick: {
+    cost: 50,
+    multiplier: 2,
+    purchased: false
+  }
+};
 
-// -------------------------------------------------
-// Helper: create an <img> element for a reward
-// -------------------------------------------------
-function createReward(src, className, x, y) {
-    const img = document.createElement('img');
-    img.src = src;
-    img.className = className + ' rotate-10s';
-    img.style.left = `${x}px`;
-    img.style.top  = `${y}px`;
-    rewardLayer.appendChild(img);
-    setTimeout(() => img.remove(), 10_000);   // 10 s
+let passiveUpgrades = {
+  autoClicker: {
+    cost: 100,
+    cps: 1,
+    amount: 0
+  }
+};
+
+// Milestone animation control
+let milestones = [10, 100, 1000, 10000];
+let milestoneShown = {}; // to avoid repeating animation for the same milestone
+
+// -------------------- CORE GAME --------------------
+function clickButton() {
+  score += clickValue;
+  updateDisplay();
+  checkMilestones();
 }
 
-// -------------------------------------------------
-// Random position helper (unchanged)
-// -------------------------------------------------
-function randomPos(radius = 80) {
-    const rect = document.querySelector('.logo').getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    const angle = Math.random() * Math.PI * 2;
-    const r = Math.random() * radius;
-    const x = cx + r * Math.cos(angle) - 15;
-    const y = cy + r * Math.sin(angle) - 15;
-    return { x, y };
+// -------------------- UPGRADES --------------------
+function buyDoubleClick() {
+  let u = upgrades.doubleClick;
+  if (!u.purchased && score >= u.cost) {
+    score -= u.cost;
+    clickValue *= u.multiplier;
+    u.purchased = true;
+    updateDisplay();
+    updateUpgradeUI();
+    saveGame();
+  }
 }
 
-// -------------------------------------------------
-// Milestone rewards
-// -------------------------------------------------
-function triggerReward(newScore) {
-    if (newScore === 10) {
-        for (let i = 0; i < 12; i++) {
-            const { x, y } = randomPos(100);
-            createReward('assets/rialo.png', 'flower-piece', x, y);
-        }
-    }
-    if (newScore === 100) {
-        const { x, y } = randomPos(60);
-        createReward('assets/cat-arm.png', 'cat-arm', x, y);
-    }
-    if (newScore === 1000) {
-        const { x, y } = randomPos(40);
-        createReward('assets/cat.png', 'cat-hug', x, y);
-    }
-    if (newScore === 10000) {
-        const { x, y } = randomPos(30);
-        createReward('assets/cat-superman.png', 'cat-super', x, y);
-    }
+function buyAutoClicker() {
+  let u = passiveUpgrades.autoClicker;
+  if (score >= u.cost) {
+    score -= u.cost;
+    u.amount += 1;
+    u.cost = Math.floor(u.cost * 1.3);
+    updateDisplay();
+    updatePassiveUI();
+    saveGame();
+  }
 }
 
-// -------------------------------------------------
-// Click handling
-// -------------------------------------------------
-btn.addEventListener('click', () => {
-    score++;
-    scoreEl.textContent = score;
-    localStorage.setItem('score', score);
-    triggerReward(score);
-});
-
-// -------------------------------------------------
-// Reset game (unchanged from earlier)
-// -------------------------------------------------
-function resetGame() {
-    score = 0;
-    scoreEl.textContent = score;
-    localStorage.setItem('score', score);
-    while (rewardLayer.firstChild) rewardLayer.removeChild(rewardLayer.firstChild);
+// -------------------- UI UPDATES --------------------
+function updateDisplay() {
+  document.getElementById("score").innerText = formatNumber(score);
 }
-resetBtn.addEventListener('click', () => {
-    if (confirm('Reset the game and start over?')) resetGame();
-});
+
+function updateUpgradeUI() {
+  let btn = document.getElementById("btnDoubleClick");
+  if (upgrades.doubleClick.purchased) {
+    btn.innerText = "Purchased";
+    btn.disabled = true;
+  } else {
+    btn.innerText = `Buy x2 (Cost: ${upgrades.doubleClick.cost})`;
+  }
+}
+
+function updatePassiveUI() {
+  let btn = document.getElementById("btnAutoClicker");
+  btn.innerText = `Buy AutoClicker (Cost: ${passiveUpgrades.autoClicker.cost}) — Owned: ${passiveUpgrades.autoClicker.amount}`;
+}
+
+// -------------------- PASSIVE INCOME --------------------
+setInterval(function () {
+  let inc = passiveUpgrades.autoClicker.amount * passiveUpgrades.autoClicker.cps;
+  score += inc;
+  if (inc > 0) {
+    updateDisplay();
+    checkMilestones();
+  }
+}, 1000);
+
+// -------------------- MILESTONE ANIMATIONS --------------------
+function checkMilestones() {
+  for (let m of milestones) {
+    if (score >= m && !milestoneShown[m]) {
+      showMilestoneAnimation(m);
+      milestoneShown[m] = true;
+    }
+  }
+}
+
+function showMilestoneAnimation(m) {
+  let banner = document.createElement("div");
+  banner.className = "milestone-banner";
+  banner.innerText = `Milestone reached: ${formatNumber(m)}!`;
+  document.body.appendChild(banner);
+
+  setTimeout(() => {
+    banner.remove();
+  }, 10000); // 10 seconds
+}
+
+// -------------------- SAVE / LOAD --------------------
+function saveGame() {
+  let data = {
+    score,
+    clickValue,
+    upgrades,
+    passiveUpgrades,
+    milestoneShown
+  };
+  localStorage.setItem("rialoClicker_save", JSON.stringify(data));
+}
+
+function loadGame() {
+  let data = JSON.parse(localStorage.getItem("rialoClicker_save"));
+  if (data) {
+    score = data.score;
+    clickValue = data.clickValue;
+    upgrades = data.upgrades;
+    passiveUpgrades = data.passiveUpgrades;
+    milestoneShown = data.milestoneShown || {};
+  }
+  updateDisplay();
+  updateUpgradeUI();
+  updatePassiveUI();
+}
+
+// Auto save every 5 seconds
+setInterval(saveGame, 5000);
+
+// -------------------- HELPER --------------------
+function formatNumber(num) {
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
+  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
+  return num;
+}
+
+// -------------------- INIT --------------------
+window.onload = function () {
+  loadGame();
+};
