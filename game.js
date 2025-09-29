@@ -1,127 +1,93 @@
-// game.js - Rialo Mini Clicker (English UI & code)
-// Author: assistant (provided to user)
-// NOTES:
-// - Milestones: 10, 100, 1000, 10000 -> show branded banner for 10 seconds
-// - Reset clears localStorage and resets state
-// - Script will try a few logo paths (cat-superman.png, cat.png, assets/...) automatically.
-// - All public functions are attached to window so HTML onclick works.
-
-"use strict";
-
-/* -------------------- CONFIG -------------------- */
-const LOGO_CANDIDATES = [
-  "cat-superman.png",
-  "cat.png",
-  "assets/cat-superman.png",
-  "assets/cat.png"
-];
-
-const MILESTONES = [10, 100, 1000, 10000];
-
-/* -------------------- GAME STATE -------------------- */
 let score = 0;
-let clickValue = 1;
+let milestones = { 10: false, 100: false, 1000: false };
 
-let upgrades = {
-  doubleClick: {
-    cost: 50,
-    multiplier: 2,
-    purchased: false
-  }
-};
-
-let passiveUpgrades = {
-  autoClicker: {
-    cost: 100,
-    cps: 1,
-    amount: 0
-  }
-};
-
-let milestoneShown = {}; // { "10": true, ... }
-let prevScore = 0;
-
-/* intervals */
-let passiveInterval = null;
-let autosaveInterval = null;
-
-/* -------------------- UTIL -------------------- */
-function formatNumber(num) {
-  if (num === null || num === undefined) return "0";
-  if (Number.isNaN(num)) return "0";
-  const n = Number(num);
-  if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
-  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
-  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
-  if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
-  return Math.floor(n).toString();
-}
-
-/* choose first existing logo by trying to load images */
-function chooseLogo() {
-  return new Promise((resolve) => {
-    let i = 0;
-    function tryNext() {
-      if (i >= LOGO_CANDIDATES.length) return resolve(null);
-      const src = LOGO_CANDIDATES[i++];
-      const img = new Image();
-      img.onload = () => resolve(src);
-      img.onerror = () => tryNext();
-      img.src = src;
-    }
-    tryNext();
-  });
-}
-
-/* -------------------- UI UPDATES -------------------- */
-function updateDisplay() {
-  const scoreEl = document.getElementById("score");
-  const clickValEl = document.getElementById("clickValue");
-  if (scoreEl) scoreEl.innerText = formatNumber(score);
-  if (clickValEl) clickValEl.innerText = formatNumber(clickValue);
-}
-
-function updateUpgradeUI() {
-  const btn = document.getElementById("btnDoubleClick");
-  if (!btn) return;
-  if (upgrades.doubleClick.purchased) {
-    btn.innerText = "Purchased";
-    btn.disabled = true;
-  } else {
-    btn.innerText = `Buy x2 (Cost: ${formatNumber(upgrades.doubleClick.cost)})`;
-    btn.disabled = score < upgrades.doubleClick.cost;
-  }
-}
-
-function updatePassiveUI() {
-  const btn = document.getElementById("btnAutoClicker");
-  if (!btn) return;
-  btn.innerText = `Buy AutoClicker (Cost: ${formatNumber(passiveUpgrades.autoClicker.cost)}) — Owned: ${passiveUpgrades.autoClicker.amount}`;
-  btn.disabled = score < passiveUpgrades.autoClicker.cost;
-}
-
-/* -------------------- CORE ACTIONS -------------------- */
+// ---------------- CLICK ----------------
 function clickButton() {
-  prevScore = score;
-  score += clickValue;
-  updateDisplay();
-  checkMilestonesCrossing(prevScore);
-  saveGame();
+  let multiplier = getRandomMultiplier();
+  let gain = 1 * multiplier;
+  score += gain;
+  document.getElementById("score").innerText = score;
+
+  // Nếu có multiplier > 1 thì hiện thông báo
+  if (multiplier > 1) {
+    showMultiplierEffect(multiplier);
+  }
+
+  checkMilestones();
 }
 
-function buyDoubleClick() {
-  const u = upgrades.doubleClick;
-  if (u.purchased) return;
-  if (score < u.cost) return;
-  score -= u.cost;
-  clickValue *= u.multiplier;
-  u.purchased = true;
-  updateDisplay();
-  updateUpgradeUI();
-  saveGame();
+// ---------------- RANDOM MULTIPLIER ----------------
+function getRandomMultiplier() {
+  let roll = Math.random();
+  if (roll < 0.05) return 10;   // 5% x10
+  if (roll < 0.15) return 3;    // 10% x3
+  if (roll < 0.35) return 2;    // 20% x2
+  return 1;                     // 65% normal
 }
 
-function buyAutoClicker() {
-  const u = passiveUpgrades.autoClicker;
-  if (score < u.cost) return;
-  score -= u.cost;
+function showMultiplierEffect(multiplier) {
+  let msg = document.createElement("div");
+  msg.innerText = `x${multiplier}!`;
+  msg.style.position = "fixed";
+  msg.style.top = "50%";
+  msg.style.left = "50%";
+  msg.style.transform = "translate(-50%, -50%)";
+  msg.style.fontSize = "40px";
+  msg.style.fontWeight = "bold";
+  msg.style.color = "red";
+  msg.style.zIndex = "5000";
+  document.body.appendChild(msg);
+
+  setTimeout(() => msg.remove(), 1000);
+}
+
+// ---------------- MILESTONES ----------------
+function checkMilestones() {
+  if (score >= 10 && !milestones[10]) {
+    milestones[10] = true;
+    launchFlowers();
+  }
+  if (score >= 100 && !milestones[100]) {
+    milestones[100] = true;
+    showCatHand();
+  }
+  if (score >= 1000 && !milestones[1000]) {
+    milestones[1000] = true;
+    flySuperCat();
+  }
+}
+
+// ---------------- FLOWERS (10 points) ----------------
+function launchFlowers() {
+  let container = document.getElementById("effect-container");
+
+  for (let i = 0; i < 1000; i++) {
+    let flower = document.createElement("div");
+    flower.className = "flower";
+    flower.style.left = Math.random() * 100 + "vw";
+    flower.style.animationDuration = (2 + Math.random() * 3) + "s";
+    container.appendChild(flower);
+
+    setTimeout(() => flower.remove(), 10000); // giữ 10s
+  }
+}
+
+// ---------------- CAT HAND (100 points) ----------------
+function showCatHand() {
+  let btn = document.getElementById("clickBtn");
+  let rect = btn.getBoundingClientRect();
+
+  let hand = document.createElement("div");
+  hand.className = "cat-hand";
+  hand.style.left = rect.left + window.scrollX + "px";
+  hand.style.top = rect.top + window.scrollY - 90 + "px";
+
+  document.body.appendChild(hand);
+}
+
+// ---------------- SUPER CAT (1000 points) ----------------
+function flySuperCat() {
+  let cat = document.getElementById("superCat");
+  cat.style.display = "block";
+  cat.style.animation = "fly 5s linear infinite";
+}
