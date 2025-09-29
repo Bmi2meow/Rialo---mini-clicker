@@ -4,6 +4,7 @@
 const btn         = document.getElementById('btn');
 const scoreEl     = document.getElementById('score');
 const rewardLayer = document.getElementById('reward-layer');
+const resetBtn    = document.getElementById('reset');
 
 // -------------------------------------------------
 // Load saved score (if any)
@@ -35,8 +36,7 @@ function randomPos(radius = 80) {
 
     const angle = Math.random() * Math.PI * 2;
     const r = Math.random() * radius;
-    // offset half of reward size (≈15 px) để căn giữa
-    const x = cx + r * Math.cos(angle) - 15;
+    const x = cx + r * Math.cos(angle) - 15; // offset half of reward size
     const y = cy + r * Math.sin(angle) - 15;
     return { x, y };
 }
@@ -45,7 +45,6 @@ function randomPos(radius = 80) {
 // Reward triggers for the four score milestones
 // -------------------------------------------------
 function triggerReward(newScore) {
-    // 10 points – flower made of many tiny logos
     if (newScore === 10) {
         for (let i = 0; i < 12; i++) {
             const { x, y } = randomPos(100);
@@ -53,19 +52,16 @@ function triggerReward(newScore) {
         }
     }
 
-    // 100 points – cat arm pushes the logo
     if (newScore === 100) {
         const { x, y } = randomPos(60);
         createReward('assets/cat-arm.png', 'cat-arm', x, y);
     }
 
-    // 1 000 points – cat hugs the logo
     if (newScore === 1000) {
         const { x, y } = randomPos(40);
         createReward('assets/cat.png', 'cat-hug', x, y);
     }
 
-    // 10 000 points – cat becomes Superman
     if (newScore === 10000) {
         const { x, y } = randomPos(30);
         createReward('assets/cat-superman.png', 'cat-super', x, y);
@@ -78,8 +74,30 @@ function triggerReward(newScore) {
 btn.addEventListener('click', () => {
     score++;
     scoreEl.textContent = score;
-    localStorage.setItem('score', score);   // lưu lại
-
-    // Kiểm tra xem có đạt mốc thưởng nào không
+    localStorage.setItem('score', score);
     triggerReward(score);
+});
+
+// -------------------------------------------------
+// Reset game – bring everything back to the initial state
+// -------------------------------------------------
+function resetGame() {
+    // 1️⃣ Reset the score
+    score = 0;
+    scoreEl.textContent = score;
+    localStorage.setItem('score', score);
+
+    // 2️⃣ Remove all reward images that were added to the page
+    while (rewardLayer.firstChild) {
+        rewardLayer.removeChild(rewardLayer.firstChild);
+    }
+}
+
+// -------------------------------------------------
+// Listen for the Reset button
+// -------------------------------------------------
+resetBtn.addEventListener('click', () => {
+    if (confirm('Reset the game and start over?')) {
+        resetGame();
+    }
 });
