@@ -35,7 +35,7 @@ function randomPos(radius = 80) {
 
     const angle = Math.random() * Math.PI * 2;
     const r = Math.random() * radius;
-    // Offset half of the reward size (≈15 px) to centre it
+    // offset half of reward size (≈15 px) để căn giữa
     const x = cx + r * Math.cos(angle) - 15;
     const y = cy + r * Math.sin(angle) - 15;
     return { x, y };
@@ -78,8 +78,8 @@ function triggerReward(newScore) {
 btn.addEventListener('click', () => {
     score++;
     scoreEl.textContent = score;
-    localStorage.setItem('score', score); // keep it across reloads
+    localStorage.setItem('score', score);   // lưu lại
 
-    // See if we just hit a reward threshold
+    // Kiểm tra xem có đạt mốc thưởng nào không
     triggerReward(score);
 });
